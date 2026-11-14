@@ -64,38 +64,38 @@ export const DealershipModal: React.FC = () => {
         {/* ========================================================
             HEADER BAR: GTA V LUXURY MOTORSPORT THEME
         ======================================================== */}
-        <div className="h-16 px-6 md:px-8 flex items-center justify-between border-b border-cyan-400/30 bg-slate-900/90 shrink-0">
-          <div className="flex items-center gap-3.5 min-w-0">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center shadow-[0_0_20px_rgba(0,240,255,0.7)] text-black shrink-0">
-              <Zap className="w-5 h-5 fill-current stroke-[2.5]" />
+        <div className="h-14 sm:h-16 px-3 sm:px-6 md:px-8 flex items-center justify-between border-b border-cyan-400/30 bg-slate-900/90 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3.5 min-w-0">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center shadow-[0_0_20px_rgba(0,240,255,0.7)] text-black shrink-0">
+              <Zap className="w-4 h-4 sm:w-5 sm:h-5 fill-current stroke-[2.5]" />
             </div>
             <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <h2 className="text-lg md:text-xl font-display font-black text-white tracking-wider truncate">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <h2 className="text-sm sm:text-lg md:text-xl font-display font-black text-white tracking-wider truncate">
                   APEX EXOTIC MOTOR CARS
                 </h2>
                 <span className="hidden sm:inline-block px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-cyan-500/20 text-cyan-300 border border-cyan-400/40 shrink-0">
                   OFFICIAL SHOWROOM
                 </span>
               </div>
-              <span className="text-[10px] md:text-[11px] font-extrabold text-gray-400 tracking-widest uppercase block truncate">
+              <span className="hidden xs:block text-[9px] sm:text-[10px] md:text-[11px] font-extrabold text-gray-400 tracking-widest uppercase truncate">
                 PREMIER OPEN-WORLD VEHICLE DEALERSHIP • SAN ANDREAS HIGHWAY SPEC
               </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 md:gap-5 shrink-0">
-            <div className="flex items-center gap-2 px-3.5 md:px-5 py-1.5 md:py-2 rounded-2xl bg-emerald-950/90 border-2 border-emerald-400 text-emerald-300 font-display font-black text-sm md:text-base shadow-[0_0_18px_rgba(16,185,129,0.4)]">
-              <DollarSign className="w-4 h-4 md:w-5 md:h-5 text-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
-              <span>${player.cash.toLocaleString()} CASH</span>
+          <div className="flex items-center gap-2 sm:gap-3 md:gap-5 shrink-0">
+            <div className="flex items-center gap-1 sm:gap-2 px-2.5 sm:px-3.5 md:px-5 py-1 sm:py-1.5 md:py-2 rounded-xl sm:rounded-2xl bg-emerald-950/90 border-2 border-emerald-400 text-emerald-300 font-display font-black text-xs sm:text-sm md:text-base shadow-[0_0_18px_rgba(16,185,129,0.4)]">
+              <DollarSign className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 text-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+              <span>${player.cash.toLocaleString()}</span>
             </div>
 
             <button
               onClick={() => setActiveScreen('game')}
-              className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-slate-800 hover:bg-red-600 text-white flex items-center justify-center transition-all border border-white/20 cursor-pointer hover:scale-105"
+              className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full bg-slate-800 hover:bg-red-600 text-white flex items-center justify-center transition-all border border-white/20 cursor-pointer hover:scale-105"
               title="Close Showroom [ESC]"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
           </div>
         </div>
@@ -103,7 +103,7 @@ export const DealershipModal: React.FC = () => {
         {/* ========================================================
             CATEGORY FILTER TABS BAR
         ======================================================== */}
-        <div className="h-11 px-6 flex items-center gap-2 border-b border-cyan-400/20 bg-slate-950/90 shrink-0 overflow-x-auto no-scrollbar">
+        <div className="h-11 px-3 sm:px-6 flex items-center gap-2 border-b border-cyan-400/20 bg-slate-950/90 shrink-0 overflow-x-auto no-scrollbar">
           {[
             { id: 'all', label: 'All Fleet' },
             { id: 'hypercar', label: 'Hypercars' },
@@ -131,17 +131,14 @@ export const DealershipModal: React.FC = () => {
         </div>
 
         {/* ========================================================
-            CONTENT BODY: 2-COLUMN BALANCED LAYOUT
-            Left: 300px - 320px responsive vehicle roster
-            Right: Flex-1 showcase stage with zero clipping
+            CONTENT BODY: 2-COLUMN BALANCED LAYOUT (STACKS ON MOBILE)
         ======================================================== */}
-        <div className="flex-1 flex overflow-hidden min-h-0">
+        <div className="flex-1 flex flex-col md:flex-row overflow-hidden min-h-0">
           {/* ----------------------------------------------------
-              LEFT COLUMN: VEHICLE SELECTION ROSTER
+              LEFT COLUMN / TOP ROW ON MOBILE: VEHICLE ROSTER
           ---------------------------------------------------- */}
           <div
-            className="w-72 md:w-80 shrink-0 border-r border-cyan-400/25 bg-slate-900/60 p-3 space-y-2 overflow-y-auto"
-            style={{ width: '320px', minWidth: '280px', maxWidth: '340px', flexShrink: 0 }}
+            className="w-full md:w-80 md:max-w-[340px] max-h-36 sm:max-h-48 md:max-h-none shrink-0 border-b md:border-b-0 md:border-r border-cyan-400/25 bg-slate-900/60 p-2 sm:p-3 space-y-1.5 sm:space-y-2 overflow-y-auto"
           >
             {filteredVehicles.map((v) => {
               const selected = v.id === selectedDef.id;

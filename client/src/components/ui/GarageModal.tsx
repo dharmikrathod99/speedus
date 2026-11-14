@@ -50,41 +50,41 @@ export const GarageModal: React.FC = () => {
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-6 select-none animate-in fade-in duration-200">
-      <div className="relative w-full max-w-4xl h-[670px] rounded-3xl bg-slate-900/95 border-2 border-pink-400 shadow-[0_0_40px_rgba(255,0,127,0.4)] flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-2 sm:p-4 md:p-6 select-none animate-in fade-in duration-200">
+      <div className="relative w-full max-w-4xl h-[92vh] max-h-[700px] rounded-3xl bg-slate-900/95 border-2 border-pink-400 shadow-[0_0_40px_rgba(255,0,127,0.4)] flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="h-18 px-8 flex items-center justify-between border-b border-pink-400/30 bg-slate-950/80">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-pink-500/30 border border-pink-400 flex items-center justify-center shadow-[0_0_12px_rgba(255,0,127,0.6)]">
-              <Wrench className="w-6 h-6 text-pink-300" />
+        <div className="h-14 sm:h-18 px-3 sm:px-6 md:px-8 flex items-center justify-between border-b border-pink-400/30 bg-slate-950/80 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-pink-500/30 border border-pink-400 flex items-center justify-center shadow-[0_0_12px_rgba(255,0,127,0.6)] shrink-0">
+              <Wrench className="w-4 h-4 sm:w-6 sm:h-6 text-pink-300" />
             </div>
-            <div>
-              <h2 className="text-2xl font-display font-black text-white tracking-wide">
+            <div className="min-w-0">
+              <h2 className="text-sm sm:text-xl md:text-2xl font-display font-black text-white tracking-wide truncate">
                 SPEEDWORKS TUNING & CUSTOMS
               </h2>
-              <span className="text-xs font-black text-pink-300 tracking-widest uppercase">
+              <span className="text-[10px] sm:text-xs font-black text-pink-300 tracking-widest uppercase block truncate">
                 {def.name} • Bay #1
               </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2 px-5 py-2 rounded-2xl bg-emerald-950 border-2 border-emerald-400 text-emerald-300 font-display font-black text-lg shadow-[0_0_15px_rgba(16,185,129,0.5)]">
-              <DollarSign className="w-5 h-5 text-emerald-400" />
+          <div className="flex items-center gap-2 sm:gap-4 md:gap-6 shrink-0">
+            <div className="flex items-center gap-1 sm:gap-2 px-2.5 sm:px-4 md:px-5 py-1 sm:py-1.5 md:py-2 rounded-xl sm:rounded-2xl bg-emerald-950 border-2 border-emerald-400 text-emerald-300 font-display font-black text-xs sm:text-base md:text-lg shadow-[0_0_15px_rgba(16,185,129,0.5)]">
+              <DollarSign className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-emerald-400" />
               <span>${player.cash.toLocaleString()}</span>
             </div>
 
             <button
               onClick={() => setActiveScreen('game')}
-              className="w-10 h-10 rounded-full bg-slate-800 hover:bg-slate-700 text-white flex items-center justify-center transition-colors border border-white/20"
+              className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-slate-800 hover:bg-slate-700 text-white flex items-center justify-center transition-colors border border-white/20 cursor-pointer"
             >
-              <X className="w-6 h-6" />
+              <X className="w-4 h-4 sm:w-6 sm:h-6" />
             </button>
           </div>
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-pink-400/30 bg-slate-950/60 px-8 gap-4">
+        <div className="flex border-b border-pink-400/30 bg-slate-950/60 px-3 sm:px-6 md:px-8 gap-2 sm:gap-4 overflow-x-auto no-scrollbar shrink-0">
           {[
             { id: 'paint', label: 'Paint & Finish', icon: Palette },
             { id: 'neon', label: 'Underglow Kits', icon: Sparkles },
@@ -98,13 +98,13 @@ export const GarageModal: React.FC = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`py-4 px-4 flex items-center gap-2 text-xs font-black uppercase tracking-wider transition-all border-b-3 ${
+                className={`py-3 sm:py-4 px-2 sm:px-4 flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all border-b-2 sm:border-b-3 whitespace-nowrap cursor-pointer ${
                   active
                     ? 'border-pink-400 text-pink-300 shadow-[0_2px_10px_rgba(255,0,127,0.5)]'
                     : 'border-transparent text-gray-300 hover:text-white'
                 }`}
               >
-                <Icon className="w-4 h-4" />
+                <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 <span>{tab.label}</span>
               </button>
             );
@@ -112,7 +112,7 @@ export const GarageModal: React.FC = () => {
         </div>
 
         {/* Tab Body */}
-        <div className="flex-1 p-8 overflow-y-auto bg-slate-900/60">
+        <div className="flex-1 p-3 sm:p-6 md:p-8 overflow-y-auto bg-slate-900/60">
           {activeTab === 'paint' && (
             <div className="space-y-6 max-w-2xl">
               <div>

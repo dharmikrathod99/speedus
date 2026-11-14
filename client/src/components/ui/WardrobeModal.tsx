@@ -176,39 +176,39 @@ export const WardrobeModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-3 md:p-6 select-none animate-in fade-in duration-200">
-      <div className="relative w-full max-w-5xl h-[88vh] max-h-[780px] min-h-[560px] rounded-3xl bg-slate-950 border-2 border-pink-400/70 shadow-[0_0_60px_rgba(236,72,153,0.35)] flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-2 sm:p-3 md:p-6 select-none animate-in fade-in duration-200">
+      <div className="relative w-full max-w-5xl h-[92vh] max-h-[780px] rounded-3xl bg-slate-950 border-2 border-pink-400/70 shadow-[0_0_60px_rgba(236,72,153,0.35)] flex flex-col overflow-hidden">
         
         {/* ========================================================
             HEADER BAR
         ======================================================== */}
-        <div className="h-18 px-6 md:px-8 flex items-center justify-between border-b border-pink-400/30 bg-slate-900/90 shrink-0">
-          <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center shadow-[0_0_20px_rgba(236,72,153,0.7)] text-white">
-              <Shirt className="w-6 h-6 stroke-[2.5]" />
+        <div className="h-14 sm:h-18 px-3 sm:px-6 md:px-8 flex items-center justify-between border-b border-pink-400/30 bg-slate-900/90 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3.5 min-w-0">
+            <div className="w-8 h-8 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center shadow-[0_0_20px_rgba(236,72,153,0.7)] text-white shrink-0">
+              <Shirt className="w-4 h-4 sm:w-6 sm:h-6 stroke-[2.5]" />
             </div>
-            <div>
+            <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <h2 className="text-xl md:text-2xl font-display font-black text-white tracking-wider">
+                <h2 className="text-sm sm:text-xl md:text-2xl font-display font-black text-white tracking-wider truncate">
                   SUBURBAN CLOSET & WARDROBE
                 </h2>
-                <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-pink-500/20 text-pink-300 border border-pink-400/40">
+                <span className="hidden sm:inline-block px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-pink-500/20 text-pink-300 border border-pink-400/40 shrink-0">
                   APPAREL
                 </span>
               </div>
-              <span className="text-[11px] font-extrabold text-gray-400 tracking-widest uppercase block">
+              <span className="hidden xs:block text-[9px] sm:text-[11px] font-extrabold text-gray-400 tracking-widest uppercase truncate">
                 CUSTOMIZE OUTFIT, CLOTHING STYLES, FACIAL FEATURES & ACCESSORIES • [C]
               </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 shrink-0">
             <button
               onClick={() => setActiveScreen('game')}
-              className="w-10 h-10 rounded-full bg-slate-800 hover:bg-red-600 text-white flex items-center justify-center transition-all border border-white/20 cursor-pointer hover:scale-105"
+              className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-slate-800 hover:bg-red-600 text-white flex items-center justify-center transition-all border border-white/20 cursor-pointer hover:scale-105"
               title="Close Wardrobe [ESC / C]"
             >
-              <X className="w-6 h-6" />
+              <X className="w-4 h-4 sm:w-6 sm:h-6" />
             </button>
           </div>
         </div>
@@ -216,7 +216,7 @@ export const WardrobeModal: React.FC = () => {
         {/* ========================================================
             CATEGORY TABS
         ======================================================== */}
-        <div className="h-12 px-6 flex items-center gap-2 border-b border-pink-400/20 bg-slate-950/90 shrink-0 overflow-x-auto no-scrollbar">
+        <div className="h-11 sm:h-12 px-3 sm:px-6 flex items-center gap-2 border-b border-pink-400/20 bg-slate-950/90 shrink-0 overflow-x-auto no-scrollbar">
           {[
             { id: 'tops', label: 'Tops & Jackets', icon: Shirt },
             { id: 'bottoms', label: 'Bottoms & Shoes', icon: Scissors },
@@ -230,7 +230,7 @@ export const WardrobeModal: React.FC = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
+                className={`px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap cursor-pointer ${
                   activeTab === tab.id
                     ? 'bg-pink-500 text-white shadow-[0_0_15px_rgba(236,72,153,0.7)]'
                     : 'text-gray-400 hover:text-white hover:bg-slate-800'
@@ -244,13 +244,12 @@ export const WardrobeModal: React.FC = () => {
         </div>
 
         {/* ========================================================
-            BODY: LEFT PREVIEW STAGE + RIGHT CONTROLS
+            BODY: LEFT PREVIEW STAGE + RIGHT CONTROLS (STACKS ON MOBILE)
         ======================================================== */}
-        <div className="flex-1 flex overflow-hidden min-h-0">
+        <div className="flex-1 flex flex-col md:flex-row overflow-hidden min-h-0">
           {/* LEFT: CHARACTER SHOWROOM SHOWCASE */}
           <div
-            className="shrink-0 border-r border-pink-400/25 bg-slate-900/60 p-6 flex flex-col justify-between items-center relative overflow-hidden"
-            style={{ width: '380px', minWidth: '380px', maxWidth: '380px' }}
+            className="w-full md:w-80 md:max-w-[340px] max-h-36 sm:max-h-48 md:max-h-none shrink-0 border-b md:border-b-0 md:border-r border-pink-400/25 bg-slate-900/60 p-3 sm:p-6 flex flex-col justify-between items-center relative overflow-hidden"
           >
             {/* Ambient Lighting */}
             <div

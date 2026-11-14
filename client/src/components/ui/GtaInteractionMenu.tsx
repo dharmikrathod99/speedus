@@ -73,7 +73,7 @@ export const GtaInteractionMenu: React.FC<GtaInteractionMenuProps> = ({ isOpen, 
   return (
     <div className="fixed inset-0 z-50 pointer-events-auto flex items-start select-none bg-black/40 backdrop-blur-[2px] animate-in fade-in duration-150">
       {/* Authentic GTA V Left-Side Interaction Menu Panel */}
-      <div className="relative ml-4 sm:ml-8 mt-14 sm:mt-16 w-[340px] max-w-[90vw] bg-black/92 border-2 border-white/20 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.9),0_0_20px_rgba(0,240,255,0.2)] overflow-hidden flex flex-col font-sans text-white">
+      <div className="relative ml-2 sm:ml-8 mt-12 sm:mt-16 w-[calc(100vw-1rem)] sm:w-[340px] max-w-[360px] max-h-[85vh] bg-black/92 border-2 border-white/20 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.9),0_0_20px_rgba(0,240,255,0.2)] overflow-hidden flex flex-col font-sans text-white">
         {/* ========================================================
             GTA V BLACK HEADER BANNER
         ======================================================== */}

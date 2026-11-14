@@ -14,6 +14,8 @@ import {
   Crosshair,
   ArrowUp,
   ArrowDown,
+  ArrowLeft,
+  ArrowRight,
   ChevronUp,
   LogOut,
   Car,
@@ -41,6 +43,8 @@ export const MobileControls: React.FC = () => {
   const [enabled, setEnabled] = useState<boolean>(() => isMobileDevice());
   const [joystickActive, setJoystickActive] = useState<boolean>(false);
   const [joystickOffset, setJoystickOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [steeringLeft, setSteeringLeft] = useState<boolean>(false);
+  const [steeringRight, setSteeringRight] = useState<boolean>(false);
 
   const joystickCenterRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const touchIdRef = useRef<number | null>(null);
@@ -112,6 +116,49 @@ export const MobileControls: React.FC = () => {
       virtualInput.right = false;
       virtualInput.sprint = false;
     }
+  };
+
+  // Driving Left/Right Steering Arrow Handlers
+  const handleSteerLeftStart = (e: React.PointerEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    } catch {}
+    virtualInput.left = true;
+    virtualInput.right = false;
+    virtualInput.analogX = -1;
+    setSteeringLeft(true);
+  };
+
+  const handleSteerLeftEnd = (e: React.PointerEvent) => {
+    e.preventDefault();
+    virtualInput.left = false;
+    if (!steeringRight) {
+      virtualInput.analogX = 0;
+    }
+    setSteeringLeft(false);
+  };
+
+  const handleSteerRightStart = (e: React.PointerEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    } catch {}
+    virtualInput.right = true;
+    virtualInput.left = false;
+    virtualInput.analogX = 1;
+    setSteeringRight(true);
+  };
+
+  const handleSteerRightEnd = (e: React.PointerEvent) => {
+    e.preventDefault();
+    virtualInput.right = false;
+    if (!steeringLeft) {
+      virtualInput.analogX = 0;
+    }
+    setSteeringRight(false);
   };
 
   // Walking Punch / Attack Action
@@ -207,37 +254,81 @@ export const MobileControls: React.FC = () => {
   return (
     <div className="fixed inset-0 pointer-events-none z-30 select-none overflow-hidden touch-none">
       {/* ========================================================
-          VIRTUAL ANALOG JOYSTICK (Bottom-Left - Scaled for Phones)
+          STEERING / MOVEMENT CONTROLS (Bottom-Left)
+          - Driving Mode: Left (◀) & Right (▶) Touch Steering Arrows
+          - Walking Mode: 360° Omnidirectional Virtual Analog Stick
       ======================================================== */}
-      <div className="joystick-container absolute bottom-3 left-3 sm:bottom-6 sm:left-6 pointer-events-auto touch-none">
-        <div
-          onPointerDown={handleJoystickStart}
-          onPointerMove={handleJoystickMove}
-          onPointerUp={handleJoystickEnd}
-          onPointerCancel={handleJoystickEnd}
-          className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-slate-950/80 backdrop-blur-md border-2 border-cyan-400/50 shadow-[0_0_20px_rgba(0,240,255,0.35)] flex items-center justify-center cursor-grab active:cursor-grabbing"
-          style={{ touchAction: 'none' }}
-        >
-          {/* Subtle directional indicators */}
-          <div className="absolute top-1.5 w-1.5 h-1.5 rounded-full bg-cyan-400/70" />
-          <div className="absolute bottom-1.5 w-1.5 h-1.5 rounded-full bg-cyan-400/70" />
-          <div className="absolute left-1.5 w-1.5 h-1.5 rounded-full bg-cyan-400/70" />
-          <div className="absolute right-1.5 w-1.5 h-1.5 rounded-full bg-cyan-400/70" />
-
-          {/* Draggable Analog Thumb Stick */}
-          <div
-            className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-tr from-cyan-500 to-sky-400 border-2 border-white/95 shadow-[0_0_12px_rgba(0,240,255,0.9)] flex items-center justify-center transition-transform duration-75"
-            style={{
-              transform: `translate(${joystickOffset.x}px, ${joystickOffset.y}px)`
-            }}
+      {mode === 'driving' ? (
+        <div className="absolute bottom-3 left-3 sm:bottom-6 sm:left-6 flex items-center gap-2 sm:gap-3 pointer-events-auto touch-none select-none interactive-ui">
+          {/* Steer Left Arrow Button */}
+          <button
+            onPointerDown={handleSteerLeftStart}
+            onPointerUp={handleSteerLeftEnd}
+            onPointerCancel={handleSteerLeftEnd}
+            className={`w-14 h-16 sm:w-18 sm:h-20 rounded-2xl flex flex-col items-center justify-center border-2 transition-all cursor-pointer ${
+              steeringLeft
+                ? 'bg-gradient-to-br from-cyan-400 to-sky-500 border-white text-black shadow-[0_0_25px_rgba(0,240,255,0.9)] scale-95'
+                : 'bg-slate-950/85 backdrop-blur-md border-cyan-400/60 text-cyan-300 shadow-[0_0_15px_rgba(0,240,255,0.3)] hover:border-cyan-300 active:scale-95'
+            }`}
+            style={{ touchAction: 'none' }}
+            title="Steer Left [A / ←]"
           >
-            <div className="w-4 h-4 rounded-full bg-white/50 shadow-inner" />
+            <ArrowLeft className={`w-7 h-7 sm:w-9 sm:h-9 ${steeringLeft ? 'text-black stroke-[3]' : 'text-cyan-300'}`} />
+            <span className={`text-[8px] sm:text-[10px] font-black uppercase tracking-wider mt-0.5 ${steeringLeft ? 'text-black' : 'text-cyan-200'}`}>
+              LEFT
+            </span>
+          </button>
+
+          {/* Steer Right Arrow Button */}
+          <button
+            onPointerDown={handleSteerRightStart}
+            onPointerUp={handleSteerRightEnd}
+            onPointerCancel={handleSteerRightEnd}
+            className={`w-14 h-16 sm:w-18 sm:h-20 rounded-2xl flex flex-col items-center justify-center border-2 transition-all cursor-pointer ${
+              steeringRight
+                ? 'bg-gradient-to-br from-cyan-400 to-sky-500 border-white text-black shadow-[0_0_25px_rgba(0,240,255,0.9)] scale-95'
+                : 'bg-slate-950/85 backdrop-blur-md border-cyan-400/60 text-cyan-300 shadow-[0_0_15px_rgba(0,240,255,0.3)] hover:border-cyan-300 active:scale-95'
+            }`}
+            style={{ touchAction: 'none' }}
+            title="Steer Right [D / →]"
+          >
+            <ArrowRight className={`w-7 h-7 sm:w-9 sm:h-9 ${steeringRight ? 'text-black stroke-[3]' : 'text-cyan-300'}`} />
+            <span className={`text-[8px] sm:text-[10px] font-black uppercase tracking-wider mt-0.5 ${steeringRight ? 'text-black' : 'text-cyan-200'}`}>
+              RIGHT
+            </span>
+          </button>
+        </div>
+      ) : (
+        <div className="joystick-container absolute bottom-3 left-3 sm:bottom-6 sm:left-6 pointer-events-auto touch-none">
+          <div
+            onPointerDown={handleJoystickStart}
+            onPointerMove={handleJoystickMove}
+            onPointerUp={handleJoystickEnd}
+            onPointerCancel={handleJoystickEnd}
+            className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-slate-950/80 backdrop-blur-md border-2 border-cyan-400/50 shadow-[0_0_20px_rgba(0,240,255,0.35)] flex items-center justify-center cursor-grab active:cursor-grabbing"
+            style={{ touchAction: 'none' }}
+          >
+            {/* Subtle directional indicators */}
+            <div className="absolute top-1.5 w-1.5 h-1.5 rounded-full bg-cyan-400/70" />
+            <div className="absolute bottom-1.5 w-1.5 h-1.5 rounded-full bg-cyan-400/70" />
+            <div className="absolute left-1.5 w-1.5 h-1.5 rounded-full bg-cyan-400/70" />
+            <div className="absolute right-1.5 w-1.5 h-1.5 rounded-full bg-cyan-400/70" />
+
+            {/* Draggable Analog Thumb Stick */}
+            <div
+              className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-tr from-cyan-500 to-sky-400 border-2 border-white/95 shadow-[0_0_12px_rgba(0,240,255,0.9)] flex items-center justify-center transition-transform duration-75"
+              style={{
+                transform: `translate(${joystickOffset.x}px, ${joystickOffset.y}px)`
+              }}
+            >
+              <div className="w-4 h-4 rounded-full bg-white/50 shadow-inner" />
+            </div>
+          </div>
+          <div className="text-center text-[9px] sm:text-[10px] font-black text-cyan-300/80 mt-1 uppercase tracking-wider">
+            Move
           </div>
         </div>
-        <div className="text-center text-[9px] sm:text-[10px] font-black text-cyan-300/80 mt-1 uppercase tracking-wider">
-          {mode === 'driving' ? 'Steer' : 'Move'}
-        </div>
-      </div>
+      )}
 
       {/* ========================================================
           RIGHT ACTION BUTTONS (DRIVING MODE - Responsive Sizing)

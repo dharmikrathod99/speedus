@@ -165,8 +165,8 @@ export const FullCityMapModal: React.FC = () => {
   const cityRoadCoords = [-210, -140, -70, 0, 70, 140, 210];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-3 md:p-6 select-none animate-in fade-in duration-200">
-      <div className="relative w-full max-w-7xl h-[92vh] max-h-[860px] min-h-[600px] rounded-3xl bg-slate-950 border-2 border-slate-700 shadow-[0_0_60px_rgba(0,0,0,0.9)] flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-2 sm:p-3 md:p-6 select-none animate-in fade-in duration-200">
+      <div className="relative w-full max-w-7xl h-[92vh] max-h-[860px] rounded-3xl bg-slate-950 border-2 border-slate-700 shadow-[0_0_60px_rgba(0,0,0,0.9)] flex flex-col overflow-hidden">
         
         {/* ========================================================
             AUTHENTIC GTA V PAUSE MENU HEADER
