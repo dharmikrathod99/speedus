@@ -23,52 +23,6 @@ export const Speedometer: React.FC = () => {
   return (
     <>
       {/* ========================================================
-          MOBILE COMPACT HUD CLUSTER (Center-Bottom - Zero Pedal Overlap)
-      ======================================================== */}
-      <div className="block sm:hidden fixed bottom-3 left-1/2 -translate-x-1/2 z-20 select-none pointer-events-none">
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-black/85 backdrop-blur-md border border-cyan-400/50 shadow-[0_4px_20px_rgba(0,0,0,0.8)]">
-          {/* Digital Speed Number */}
-          <div className="flex items-baseline gap-0.5">
-            <span className="font-display font-black text-2xl text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.7)]">
-              {displaySpeed}
-            </span>
-            <span className="font-racing font-bold text-[9px] text-cyan-300 uppercase">
-              {speedUnit}
-            </span>
-          </div>
-
-          {/* Compact Gear Indicator */}
-          <div
-            className={`w-7 h-7 rounded-lg flex items-center justify-center font-display font-black text-sm border ${
-              gear === 'R'
-                ? 'bg-amber-500/40 text-amber-300 border-amber-400'
-                : isRedline
-                ? 'bg-red-500/40 text-red-300 border-red-400 animate-pulse'
-                : 'bg-cyan-500/30 text-cyan-200 border-cyan-400/80'
-            }`}
-          >
-            {gear}
-          </div>
-
-          {/* Nitro Mini Gauge */}
-          <div className="w-12 flex flex-col gap-0.5">
-            <div className="flex items-center justify-between text-[7px] font-black text-gray-300">
-              <span className="text-pink-400 flex items-center gap-0.5">
-                <Flame className="w-2.5 h-2.5" /> NOS
-              </span>
-              <span>{Math.round(nitro)}%</span>
-            </div>
-            <div className="h-1.5 w-full bg-slate-900 rounded-full overflow-hidden border border-pink-400/40">
-              <div
-                className="h-full bg-gradient-to-r from-pink-500 to-rose-400 rounded-full transition-all"
-                style={{ width: `${Math.max(4, Math.min(100, nitro))}%` }}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ========================================================
           DESKTOP / TABLET FULL TACHOMETER (Bottom-Right)
       ======================================================== */}
       <div className="hidden sm:block fixed bottom-6 right-8 z-20 select-none pointer-events-none scale-90 md:scale-100 origin-bottom-right">

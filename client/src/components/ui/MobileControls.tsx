@@ -21,11 +21,15 @@ import {
   Car,
   ShoppingBag,
   Home,
-  Hand
+  Hand,
+  Fuel
 } from 'lucide-react';
 
 export const MobileControls: React.FC = () => {
   const mode = useGameStore((s) => s.mode);
+  const vehicleSpeed = useGameStore((s) => s.vehicleSpeed);
+  const vehicleFuel = useGameStore((s) => s.vehicleFuel);
+  const speedUnit = useGameStore((s) => s.settings.speedUnit);
   const isInsideHouse = useGameStore((s) => s.isInsideHouse);
   const isInsideShop = useGameStore((s) => s.isInsideShop);
   const activeShopInteriorId = useGameStore((s) => s.activeShopInteriorId);
@@ -38,6 +42,8 @@ export const MobileControls: React.FC = () => {
   const activeWeapon = useGameStore((s) => s.activeWeapon);
   const setActiveWeapon = useGameStore((s) => s.setActiveWeapon);
   const playerPos = useGameStore((s) => s.playerPosition);
+
+  const displaySpeed = speedUnit === 'mph' ? Math.round(vehicleSpeed * 0.621371) : vehicleSpeed;
 
   // Auto-detect mobile devices or touch screens
   const [enabled, setEnabled] = useState<boolean>(() => isMobileDevice());
@@ -378,8 +384,37 @@ export const MobileControls: React.FC = () => {
             </button>
           </div>
 
-          {/* Bottom Row: Ergonomic Gas & Brake Pedals + Drift */}
+          {/* Bottom Row: Ergonomic Gas & Brake Pedals + Drift + Compact Speed/Fuel */}
           <div className="flex items-end gap-1.5 sm:gap-2.5">
+            {/* Ultra-Compact Mobile Speed & Fuel Indicator (Right beside DRIFT button) */}
+            <div className="flex flex-col items-center justify-center px-1.5 py-1 rounded-xl sm:rounded-2xl bg-black/85 backdrop-blur-md border border-cyan-400/60 shadow-[0_4px_15px_rgba(0,0,0,0.8)] h-13 sm:h-16 w-13 sm:w-16 select-none pointer-events-none shrink-0">
+              {/* Digital Speed Value */}
+              <div className="flex items-baseline leading-none">
+                <span className="font-display font-black text-sm sm:text-base text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]">
+                  {displaySpeed}
+                </span>
+                <span className="text-[6.5px] sm:text-[7.5px] font-racing font-bold text-cyan-300 uppercase ml-0.5">
+                  {speedUnit}
+                </span>
+              </div>
+
+              {/* Mini Fuel Indicator Bar */}
+              <div className="w-full flex items-center gap-0.5 mt-1 px-0.5">
+                <Fuel className="w-2.5 h-2.5 text-amber-400 shrink-0" />
+                <div className="flex-1 h-1.5 bg-slate-900 rounded-full overflow-hidden border border-white/20">
+                  <div
+                    className={`h-full rounded-full transition-all ${
+                      vehicleFuel < 20 ? 'bg-red-500 animate-pulse' : vehicleFuel < 50 ? 'bg-amber-400' : 'bg-emerald-400'
+                    }`}
+                    style={{ width: `${Math.max(4, Math.min(100, vehicleFuel))}%` }}
+                  />
+                </div>
+              </div>
+              <span className="text-[6.5px] font-mono font-bold text-gray-300 leading-none mt-0.5">
+                {Math.round(vehicleFuel)}%
+              </span>
+            </div>
+
             {/* Handbrake Drift Button */}
             <button
               onPointerDown={() => { virtualInput.handbrake = true; }}
