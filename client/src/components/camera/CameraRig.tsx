@@ -16,13 +16,29 @@ export const CameraRig: React.FC = () => {
   const mode = useGameStore((s) => s.mode);
   const cameraMode = useGameStore((s) => s.cameraMode);
 
-  const currentCamPos = useRef<THREE.Vector3>(new THREE.Vector3(60, 6, -14));
-  const currentLookAt = useRef<THREE.Vector3>(new THREE.Vector3(60, 1, -24));
+  const currentCamPos = useRef<THREE.Vector3>(new THREE.Vector3(60, 2.5, -36.5));
+  const currentLookAt = useRef<THREE.Vector3>(new THREE.Vector3(60, 1.3, -32));
 
-  const orbitAngleX = useRef<number>(0);
-  const orbitAngleY = useRef<number>(0.3);
+  // Initialize camera BEHIND the character looking forward (Math.PI puts camera at negative Z offset)
+  const orbitAngleX = useRef<number>(Math.PI);
+  const orbitAngleY = useRef<number>(0.28);
   const isMouseDown = useRef<boolean>(false);
   const lastInteractionTime = useRef<number>(performance.now());
+
+  // Track mode transitions to smoothly align camera behind player / vehicle
+  const prevMode = useRef(mode);
+  useEffect(() => {
+    if (prevMode.current !== mode) {
+      prevMode.current = mode;
+      if (mode === 'driving') {
+        orbitAngleX.current = vehiclePhysics.heading + Math.PI;
+      } else {
+        orbitAngleX.current = playerPhysics.rotationY + Math.PI;
+      }
+      orbitAngleY.current = 0.28;
+      lastInteractionTime.current = performance.now();
+    }
+  }, [mode]);
 
   // Mobile multi-touch camera drag tracker
   const activeTouchId = useRef<number | null>(null);
@@ -41,7 +57,7 @@ export const CameraRig: React.FC = () => {
       isMouseDown.current = false;
     };
     const handleMouseMove = (e: MouseEvent) => {
-      if (isMouseDown.current || mode === 'walking') {
+      if (isMouseDown.current) {
         orbitAngleX.current -= e.movementX * 0.0035;
         orbitAngleY.current = Math.max(0.05, Math.min(1.22, orbitAngleY.current + e.movementY * 0.0025));
         lastInteractionTime.current = performance.now();
@@ -145,6 +161,18 @@ export const CameraRig: React.FC = () => {
       lastInteractionTime.current = now;
     }
 
+    // Instant Recenter Camera Request (from Mobile Recenter button or 'V' key)
+    if (virtualInput.recenterCamera) {
+      virtualInput.recenterCamera = false;
+      if (mode === 'driving') {
+        orbitAngleX.current = vehiclePhysics.heading + Math.PI;
+      } else {
+        orbitAngleX.current = playerPhysics.rotationY + Math.PI;
+      }
+      orbitAngleY.current = 0.28;
+      lastInteractionTime.current = now - 5000;
+    }
+
     if (mode === 'driving') {
       const vPos = vehiclePhysics.pos;
       const heading = vehiclePhysics.heading;
@@ -159,13 +187,13 @@ export const CameraRig: React.FC = () => {
       }
 
       if (cameraMode === 'chase') {
-        // High-speed smooth chase camera behind vehicle
+        // High-speed smooth chase camera behind vehicle (heading + Math.PI ensures camera is BEHIND rear bumper)
         const distBehind = 7.2 + (speedKmh / 300) * 2.0;
         const heightAbove = 2.5 + (speedKmh / 300) * 0.6;
 
         // Auto-recenter behind car when driving if player hasn't touched camera for 1.8s
         if (timeSinceManualLook > 1.8) {
-          let targetAngle = -heading;
+          let targetAngle = heading + Math.PI;
           let diff = (targetAngle - orbitAngleX.current) % (Math.PI * 2);
           if (diff < -Math.PI) diff += Math.PI * 2;
           if (diff > Math.PI) diff -= Math.PI * 2;
@@ -232,15 +260,16 @@ export const CameraRig: React.FC = () => {
       const isInsideShop = useGameStore.getState().isInsideShop;
       const isInside = isInsideHouse || isInsideShop;
 
-      // Smart GTA-style Camera Auto-Follow on Mobile:
-      // When walking forward/steering with joystick and not manually touching camera for 1.0s,
-      // gently steer camera behind player's movement heading so mobile play is effortless
-      if (playerPhysics.isMoving && timeSinceManualLook > 1.0 && !isInside) {
-        let targetAngle = -playerPhysics.rotationY;
+      // Smart GTA-style Camera Follow Behind Player:
+      // When walking forward and player hasn't manually adjusted camera for 2.2s,
+      // gently align camera BEHIND player's back looking forward (rotationY + Math.PI)
+      const isWalkingForward = virtualInput.forward || virtualInput.analogY > 0.25;
+      if (playerPhysics.isMoving && isWalkingForward && timeSinceManualLook > 2.2 && !isInside) {
+        let targetAngle = playerPhysics.rotationY + Math.PI;
         let diff = (targetAngle - orbitAngleX.current) % (Math.PI * 2);
         if (diff < -Math.PI) diff += Math.PI * 2;
         if (diff > Math.PI) diff -= Math.PI * 2;
-        orbitAngleX.current += diff * (1 - Math.exp(-2.2 * dt));
+        orbitAngleX.current += diff * (1 - Math.exp(-2.0 * dt));
       }
 
       const dist = isInside ? 2.8 : 4.5;

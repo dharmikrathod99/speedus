@@ -19,6 +19,7 @@ export interface VirtualInputState {
   horn: boolean;
   camDeltaX: number;
   camDeltaY: number;
+  recenterCamera: boolean;
 }
 
 export const virtualInput: VirtualInputState = {
@@ -36,6 +37,7 @@ export const virtualInput: VirtualInputState = {
   horn: false,
   camDeltaX: 0,
   camDeltaY: 0,
+  recenterCamera: false,
 };
 
 export const setVirtualInput = (partial: Partial<VirtualInputState>) => {
@@ -57,6 +59,7 @@ export const resetVirtualInput = () => {
   virtualInput.horn = false;
   virtualInput.camDeltaX = 0;
   virtualInput.camDeltaY = 0;
+  virtualInput.recenterCamera = false;
 };
 
 /**

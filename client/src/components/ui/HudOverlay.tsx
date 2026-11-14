@@ -18,10 +18,12 @@ import { getNearestEnterableHouse } from '../../stores/houseSystem';
 import { CITY_SHOPS } from '../../data/shopsData';
 import { usePedestrianStore } from '../../stores/pedestrianCombat';
 import { soundSystem } from '../../audio/soundSystem';
+import { virtualInput } from '../../stores/virtualInput';
 import {
   DollarSign,
   Smartphone as PhoneIcon,
   Map,
+  Camera,
   ShoppingBag,
   Store,
   Wrench,
@@ -117,6 +119,15 @@ export const HudOverlay: React.FC = () => {
       if (k === 'm') setActiveScreen(activeScreen === 'map' ? 'game' : 'map');
       if (k === 'u' && mode === 'walking') setActiveScreen(activeScreen === 'wardrobe' ? 'game' : 'wardrobe');
       
+      // Camera Recenter / Cycle: [V]
+      if (k === 'v') {
+        virtualInput.recenterCamera = true;
+        if (mode === 'driving') {
+          useGameStore.getState().cycleCameraMode();
+        }
+        soundSystem.playUiClick();
+      }
+
       // Enter / Exit Vehicle: [C] (guarded against modifier combos)
       if (!e.ctrlKey && !e.metaKey && !e.altKey && k === 'c') {
         useGameStore.getState().toggleVehicleEntry();
@@ -236,8 +247,21 @@ export const HudOverlay: React.FC = () => {
                   <span>{player.cash.toLocaleString()}</span>
                 </div>
 
-                {/* Quick Menu Icons (Map & Phone) */}
+                {/* Quick Menu Icons (Camera Recenter, Map & Phone) */}
                 <div className="flex items-center gap-1 bg-black/70 backdrop-blur-md p-1 rounded-xl sm:rounded-2xl border border-white/15 shadow-lg">
+                  <button
+                    onClick={() => {
+                      virtualInput.recenterCamera = true;
+                      if (mode === 'driving') {
+                        useGameStore.getState().cycleCameraMode();
+                      }
+                      soundSystem.playUiClick();
+                    }}
+                    className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-slate-900/80 hover:bg-cyan-500 text-cyan-300 hover:text-black transition-all cursor-pointer"
+                    title="Recenter Camera Behind Character / Vehicle [V]"
+                  >
+                    <Camera className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  </button>
                   <button
                     onClick={() => setActiveScreen('map')}
                     className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-slate-900/80 hover:bg-cyan-500 text-gray-300 hover:text-black transition-all cursor-pointer"
