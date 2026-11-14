@@ -265,13 +265,13 @@ export const MobileControls: React.FC = () => {
           - Walking Mode: 360° Omnidirectional Virtual Analog Stick
       ======================================================== */}
       {mode === 'driving' ? (
-        <div className="absolute bottom-3 left-3 sm:bottom-6 sm:left-6 flex items-center gap-2 sm:gap-3 pointer-events-auto touch-none select-none interactive-ui">
+        <div className="absolute bottom-2 left-2 sm:bottom-4 sm:left-4 flex items-center gap-1.5 sm:gap-2.5 pointer-events-auto touch-none select-none interactive-ui">
           {/* Steer Left Arrow Button */}
           <button
             onPointerDown={handleSteerLeftStart}
             onPointerUp={handleSteerLeftEnd}
             onPointerCancel={handleSteerLeftEnd}
-            className={`w-14 h-16 sm:w-18 sm:h-20 rounded-2xl flex flex-col items-center justify-center border-2 transition-all cursor-pointer ${
+            className={`w-12 h-14 sm:w-15 sm:h-18 rounded-xl sm:rounded-2xl flex flex-col items-center justify-center border-2 transition-all cursor-pointer ${
               steeringLeft
                 ? 'bg-gradient-to-br from-cyan-400 to-sky-500 border-white text-black shadow-[0_0_25px_rgba(0,240,255,0.9)] scale-95'
                 : 'bg-slate-950/85 backdrop-blur-md border-cyan-400/60 text-cyan-300 shadow-[0_0_15px_rgba(0,240,255,0.3)] hover:border-cyan-300 active:scale-95'
@@ -279,8 +279,8 @@ export const MobileControls: React.FC = () => {
             style={{ touchAction: 'none' }}
             title="Steer Left [A / ←]"
           >
-            <ArrowLeft className={`w-7 h-7 sm:w-9 sm:h-9 ${steeringLeft ? 'text-black stroke-[3]' : 'text-cyan-300'}`} />
-            <span className={`text-[8px] sm:text-[10px] font-black uppercase tracking-wider mt-0.5 ${steeringLeft ? 'text-black' : 'text-cyan-200'}`}>
+            <ArrowLeft className={`w-6 h-6 sm:w-8 sm:h-8 ${steeringLeft ? 'text-black stroke-[3]' : 'text-cyan-300'}`} />
+            <span className={`text-[7.5px] sm:text-[9px] font-black uppercase tracking-wider mt-0.5 ${steeringLeft ? 'text-black' : 'text-cyan-200'}`}>
               LEFT
             </span>
           </button>
@@ -290,7 +290,7 @@ export const MobileControls: React.FC = () => {
             onPointerDown={handleSteerRightStart}
             onPointerUp={handleSteerRightEnd}
             onPointerCancel={handleSteerRightEnd}
-            className={`w-14 h-16 sm:w-18 sm:h-20 rounded-2xl flex flex-col items-center justify-center border-2 transition-all cursor-pointer ${
+            className={`w-12 h-14 sm:w-15 sm:h-18 rounded-xl sm:rounded-2xl flex flex-col items-center justify-center border-2 transition-all cursor-pointer ${
               steeringRight
                 ? 'bg-gradient-to-br from-cyan-400 to-sky-500 border-white text-black shadow-[0_0_25px_rgba(0,240,255,0.9)] scale-95'
                 : 'bg-slate-950/85 backdrop-blur-md border-cyan-400/60 text-cyan-300 shadow-[0_0_15px_rgba(0,240,255,0.3)] hover:border-cyan-300 active:scale-95'
@@ -298,8 +298,8 @@ export const MobileControls: React.FC = () => {
             style={{ touchAction: 'none' }}
             title="Steer Right [D / →]"
           >
-            <ArrowRight className={`w-7 h-7 sm:w-9 sm:h-9 ${steeringRight ? 'text-black stroke-[3]' : 'text-cyan-300'}`} />
-            <span className={`text-[8px] sm:text-[10px] font-black uppercase tracking-wider mt-0.5 ${steeringRight ? 'text-black' : 'text-cyan-200'}`}>
+            <ArrowRight className={`w-6 h-6 sm:w-8 sm:h-8 ${steeringRight ? 'text-black stroke-[3]' : 'text-cyan-300'}`} />
+            <span className={`text-[7.5px] sm:text-[9px] font-black uppercase tracking-wider mt-0.5 ${steeringRight ? 'text-black' : 'text-cyan-200'}`}>
               RIGHT
             </span>
           </button>
@@ -385,23 +385,23 @@ export const MobileControls: React.FC = () => {
           </div>
 
           {/* Bottom Row: Ergonomic Gas & Brake Pedals + Drift + Compact Speed/Fuel */}
-          <div className="flex items-end gap-1.5 sm:gap-2.5">
+          <div className="flex items-end gap-1.5 sm:gap-2">
             {/* Ultra-Compact Mobile Speed & Fuel Indicator (Right beside DRIFT button) */}
-            <div className="flex flex-col items-center justify-center px-1.5 py-1 rounded-xl sm:rounded-2xl bg-black/85 backdrop-blur-md border border-cyan-400/60 shadow-[0_4px_15px_rgba(0,0,0,0.8)] h-13 sm:h-16 w-13 sm:w-16 select-none pointer-events-none shrink-0">
+            <div className="flex flex-col items-center justify-center px-1 py-0.5 rounded-xl bg-black/85 backdrop-blur-md border border-cyan-400/60 shadow-[0_4px_15px_rgba(0,0,0,0.8)] h-12 w-12 sm:h-14 sm:w-14 select-none pointer-events-none shrink-0">
               {/* Digital Speed Value */}
               <div className="flex items-baseline leading-none">
-                <span className="font-display font-black text-sm sm:text-base text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]">
+                <span className="font-display font-black text-xs sm:text-sm text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]">
                   {displaySpeed}
                 </span>
-                <span className="text-[6.5px] sm:text-[7.5px] font-racing font-bold text-cyan-300 uppercase ml-0.5">
+                <span className="text-[6px] sm:text-[7px] font-racing font-bold text-cyan-300 uppercase ml-0.5">
                   {speedUnit}
                 </span>
               </div>
 
               {/* Mini Fuel Indicator Bar */}
-              <div className="w-full flex items-center gap-0.5 mt-1 px-0.5">
-                <Fuel className="w-2.5 h-2.5 text-amber-400 shrink-0" />
-                <div className="flex-1 h-1.5 bg-slate-900 rounded-full overflow-hidden border border-white/20">
+              <div className="w-full flex items-center gap-0.5 mt-0.5 px-0.5">
+                <Fuel className="w-2 h-2 text-amber-400 shrink-0" />
+                <div className="flex-1 h-1 bg-slate-900 rounded-full overflow-hidden border border-white/20">
                   <div
                     className={`h-full rounded-full transition-all ${
                       vehicleFuel < 20 ? 'bg-red-500 animate-pulse' : vehicleFuel < 50 ? 'bg-amber-400' : 'bg-emerald-400'
@@ -410,7 +410,7 @@ export const MobileControls: React.FC = () => {
                   />
                 </div>
               </div>
-              <span className="text-[6.5px] font-mono font-bold text-gray-300 leading-none mt-0.5">
+              <span className="text-[6px] font-mono font-bold text-gray-300 leading-none mt-0.5">
                 {Math.round(vehicleFuel)}%
               </span>
             </div>
@@ -420,10 +420,10 @@ export const MobileControls: React.FC = () => {
               onPointerDown={() => { virtualInput.handbrake = true; }}
               onPointerUp={() => { virtualInput.handbrake = false; }}
               onPointerCancel={() => { virtualInput.handbrake = false; }}
-              className="w-11 h-13 sm:w-13 sm:h-16 rounded-xl sm:rounded-2xl bg-slate-900/90 backdrop-blur-md border border-yellow-400 text-yellow-300 font-black flex flex-col items-center justify-center shadow-[0_0_12px_rgba(250,204,21,0.4)] active:scale-95 transition-transform"
+              className="w-10 h-12 sm:w-12 sm:h-14 rounded-xl bg-slate-900/90 backdrop-blur-md border border-yellow-400 text-yellow-300 font-black flex flex-col items-center justify-center shadow-[0_0_12px_rgba(250,204,21,0.4)] active:scale-95 transition-transform"
             >
-              <RotateCcw className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="text-[8px] sm:text-[9px] font-black">DRIFT</span>
+              <RotateCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span className="text-[7.5px] sm:text-[8.5px] font-black">DRIFT</span>
             </button>
 
             {/* Brake / Reverse Pedal */}
@@ -431,10 +431,10 @@ export const MobileControls: React.FC = () => {
               onPointerDown={() => { virtualInput.backward = true; }}
               onPointerUp={() => { virtualInput.backward = false; }}
               onPointerCancel={() => { virtualInput.backward = false; }}
-              className="w-12 h-17 sm:w-15 sm:h-22 rounded-xl sm:rounded-2xl bg-gradient-to-b from-red-600 to-rose-700 border-2 border-white/80 text-white font-black flex flex-col items-center justify-center shadow-[0_0_15px_rgba(225,29,72,0.6)] active:scale-95 transition-transform"
+              className="w-11 h-15 sm:w-13 sm:h-18 rounded-xl bg-gradient-to-b from-red-600 to-rose-700 border-2 border-white/80 text-white font-black flex flex-col items-center justify-center shadow-[0_0_15px_rgba(225,29,72,0.6)] active:scale-95 transition-transform"
             >
-              <ArrowDown className="w-5 h-5 sm:w-7 sm:h-7" />
-              <span className="text-[8px] sm:text-[10px] font-black">BRAKE</span>
+              <ArrowDown className="w-4.5 h-4.5 sm:w-6 sm:h-6" />
+              <span className="text-[7.5px] sm:text-[9px] font-black">BRAKE</span>
             </button>
 
             {/* Accelerate / Gas Pedal */}
@@ -442,10 +442,10 @@ export const MobileControls: React.FC = () => {
               onPointerDown={() => { virtualInput.forward = true; }}
               onPointerUp={() => { virtualInput.forward = false; }}
               onPointerCancel={() => { virtualInput.forward = false; }}
-              className="w-13 h-21 sm:w-17 sm:h-26 rounded-xl sm:rounded-2xl bg-gradient-to-b from-emerald-500 to-teal-600 border-2 border-white/90 text-white font-black flex flex-col items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.7)] active:scale-95 transition-transform"
+              className="w-12 h-18 sm:w-15 sm:h-22 rounded-xl bg-gradient-to-b from-emerald-500 to-teal-600 border-2 border-white/90 text-white font-black flex flex-col items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.7)] active:scale-95 transition-transform"
             >
-              <ArrowUp className="w-6 h-6 sm:w-8 sm:h-8" />
-              <span className="text-[9px] sm:text-[11px] font-black">GAS</span>
+              <ArrowUp className="w-5 h-5 sm:w-7 sm:h-7" />
+              <span className="text-[8.5px] sm:text-[10px] font-black">GAS</span>
             </button>
           </div>
         </div>

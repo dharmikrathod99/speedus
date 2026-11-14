@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useGameStore } from '../../stores/gameStore';
+import { useIsMobile } from '../../hooks/useIsMobile';
 import { POINTS_OF_INTEREST } from '../../data/worldData';
 import { CITY_SHOPS } from '../../data/shopsData';
 import { vehiclePhysics, playerPhysics } from '../../stores/vehiclePhysics';
@@ -18,6 +19,7 @@ import {
 
 export const MiniMap: React.FC = () => {
   const mode = useGameStore((s) => s.mode);
+  const isMobile = useIsMobile();
   const player = useGameStore((s) => s.player);
   const activeMission = useGameStore((s) => s.activeMission);
   const customWaypoint = useGameStore((s) => s.customWaypoint);
@@ -429,138 +431,140 @@ export const MiniMap: React.FC = () => {
           - Swipe Left-to-Right (or tap arrow) to slide small map OUT
           - Swipe Right-to-Left (or tap arrow) to HIDE map
       ======================================================== */}
-      <div
-        className="block sm:hidden fixed top-20 left-0 z-40 select-none transition-transform duration-300 ease-out flex items-start"
-        style={{
-          transform: isMobileOpen ? 'translateX(0)' : 'translateX(-192px)',
-          touchAction: 'none'
-        }}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-      >
-        {/* Small Screen-Proportional MiniMap Box (192px Wide) */}
-        <div className="w-[192px] bg-slate-950/95 backdrop-blur-xl border-y-2 border-r-2 border-cyan-400/80 rounded-r-2xl p-2 shadow-[0_8px_30px_rgba(0,0,0,0.9),0_0_20px_rgba(0,240,255,0.35)] flex flex-col items-start gap-1">
-          {/* Header Bar */}
-          <div className="w-full flex items-center justify-between pb-1 border-b border-white/15 text-[10px] font-black uppercase text-cyan-300">
-            <span className="flex items-center gap-1">
-              <Compass className="w-3 h-3 text-cyan-400" />
-              <span>RADAR GPS</span>
-            </span>
-            <button
-              onClick={() => setIsMobileOpen(false)}
-              className="text-gray-400 hover:text-white p-0.5 active:scale-90"
-              title="Hide Map (Swipe Left)"
-            >
-              <ChevronLeft className="w-3.5 h-3.5 text-cyan-400" />
-            </button>
+      {isMobile ? (
+        <div
+          className="fixed top-14 sm:top-16 left-0 z-40 select-none transition-transform duration-300 ease-out flex items-start pointer-events-auto"
+          style={{
+            transform: isMobileOpen ? 'translateX(0)' : 'translateX(-192px)',
+            touchAction: 'none'
+          }}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
+          {/* Small Screen-Proportional MiniMap Box (192px Wide) */}
+          <div className="w-[192px] bg-slate-950/95 backdrop-blur-xl border-y-2 border-r-2 border-cyan-400/80 rounded-r-2xl p-2 shadow-[0_8px_30px_rgba(0,0,0,0.9),0_0_20px_rgba(0,240,255,0.35)] flex flex-col items-start gap-1">
+            {/* Header Bar */}
+            <div className="w-full flex items-center justify-between pb-1 border-b border-white/15 text-[10px] font-black uppercase text-cyan-300">
+              <span className="flex items-center gap-1">
+                <Compass className="w-3 h-3 text-cyan-400" />
+                <span>RADAR GPS</span>
+              </span>
+              <button
+                onClick={() => setIsMobileOpen(false)}
+                className="text-gray-400 hover:text-white p-0.5 active:scale-90"
+                title="Hide Map (Swipe Left)"
+              >
+                <ChevronLeft className="w-3.5 h-3.5 text-cyan-400" />
+              </button>
+            </div>
+
+            {/* Compact 176x115 Radar View */}
+            {renderRadarContent(176, 115)}
+
+            {/* Compact 3-Tier Status Bars (Underneath Radar) */}
+            <div className="w-[176px] flex items-center gap-1 px-0.5 mt-0.5">
+              <div className="flex-1 h-1.5 rounded-sm bg-black/80 border border-white/20 overflow-hidden shadow-inner">
+                <div
+                  className="h-full bg-emerald-500 rounded-sm"
+                  style={{ width: `${Math.max(5, Math.min(100, ((player.health || 1000) / (player.maxHealth || 1000)) * 100))}%` }}
+                />
+              </div>
+              <div className="flex-1 h-1.5 rounded-sm bg-black/80 border border-white/20 overflow-hidden shadow-inner">
+                <div
+                  className="h-full bg-sky-500 rounded-sm"
+                  style={{ width: `${Math.max(5, Math.min(100, ((player.armor || 1000) / (player.maxArmor || 1000)) * 100))}%` }}
+                />
+              </div>
+              <div className="flex-1 h-1.5 rounded-sm bg-black/80 border border-white/20 overflow-hidden shadow-inner">
+                <div
+                  className="h-full bg-amber-400 rounded-sm"
+                  style={{ width: `${Math.max(5, player.stamina || 100)}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Waypoint & Mission Badges */}
+            <div className="flex flex-col gap-0.5 mt-0.5 w-full">
+              {waypointDist !== null && (
+                <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-purple-950/90 border border-purple-400/80 text-[8px] font-black text-purple-200 truncate">
+                  <LocateFixed className="w-2.5 h-2.5 text-purple-300 shrink-0" />
+                  <span className="truncate">{waypointDist}m to Waypoint</span>
+                </div>
+              )}
+              {missionDist !== null && (
+                <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-950/90 border border-amber-400/80 text-[8px] font-black text-amber-200 truncate">
+                  <MapPin className="w-2.5 h-2.5 text-amber-300 shrink-0" />
+                  <span className="truncate">{missionDist}m to Target</span>
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Compact 176x115 Radar View */}
-          {renderRadarContent(176, 115)}
+          {/* Left Side Pull-Tab Arrow Dock Handle */}
+          <button
+            onClick={() => setIsMobileOpen((prev) => !prev)}
+            className="h-14 sm:h-16 px-1.5 rounded-r-xl bg-slate-950/95 border-r-2 border-y-2 border-cyan-400 text-cyan-300 flex flex-col items-center justify-center shadow-[0_4px_18px_rgba(0,240,255,0.6)] active:scale-95 transition-all cursor-pointer group"
+            title={isMobileOpen ? 'Swipe Left or Tap to Hide Map' : 'Swipe Right or Tap to Open Small Map'}
+          >
+            {isMobileOpen ? (
+              <ChevronLeft className="w-5 h-5 text-cyan-300 animate-pulse" />
+            ) : (
+              <div className="flex flex-col items-center gap-0.5">
+                <ChevronRight className="w-5 h-5 text-cyan-300 group-hover:translate-x-0.5 transition-transform animate-pulse" />
+                <span className="text-[8px] font-black uppercase text-cyan-400 tracking-tighter" style={{ writingMode: 'vertical-rl' }}>
+                  MAP
+                </span>
+              </div>
+            )}
+          </button>
+        </div>
+      ) : (
+        /* ========================================================
+            DESKTOP / TABLET FULL GTA V BOTTOM-LEFT RADAR HUD
+        ======================================================== */
+        <div className="fixed bottom-6 left-8 z-20 select-none flex flex-col items-start gap-1 font-sans pointer-events-auto">
+          {/* Full 250x165 Radar */}
+          {renderRadarContent(250, 165)}
 
-          {/* Compact 3-Tier Status Bars (Underneath Radar) */}
-          <div className="w-[176px] flex items-center gap-1 px-0.5 mt-0.5">
-            <div className="flex-1 h-1.5 rounded-sm bg-black/80 border border-white/20 overflow-hidden shadow-inner">
+          {/* 3-Tier Status Bars */}
+          <div className="w-[250px] flex items-center gap-1.5 px-0.5">
+            <div className="flex-1 h-2 rounded-sm bg-black/80 border border-white/20 overflow-hidden shadow-inner">
               <div
-                className="h-full bg-emerald-500 rounded-sm"
+                className="h-full bg-emerald-500 rounded-sm transition-all duration-150"
                 style={{ width: `${Math.max(5, Math.min(100, ((player.health || 1000) / (player.maxHealth || 1000)) * 100))}%` }}
               />
             </div>
-            <div className="flex-1 h-1.5 rounded-sm bg-black/80 border border-white/20 overflow-hidden shadow-inner">
+            <div className="flex-1 h-2 rounded-sm bg-black/80 border border-white/20 overflow-hidden shadow-inner">
               <div
-                className="h-full bg-sky-500 rounded-sm"
+                className="h-full bg-sky-500 rounded-sm transition-all duration-150"
                 style={{ width: `${Math.max(5, Math.min(100, ((player.armor || 1000) / (player.maxArmor || 1000)) * 100))}%` }}
               />
             </div>
-            <div className="flex-1 h-1.5 rounded-sm bg-black/80 border border-white/20 overflow-hidden shadow-inner">
+            <div className="flex-1 h-2 rounded-sm bg-black/80 border border-white/20 overflow-hidden shadow-inner">
               <div
-                className="h-full bg-amber-400 rounded-sm"
+                className="h-full bg-amber-400 rounded-sm transition-all duration-150"
                 style={{ width: `${Math.max(5, player.stamina || 100)}%` }}
               />
             </div>
           </div>
 
           {/* Waypoint & Mission Badges */}
-          <div className="flex flex-col gap-0.5 mt-0.5 w-full">
+          <div className="flex flex-col gap-1 mt-1">
             {waypointDist !== null && (
-              <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-purple-950/90 border border-purple-400/80 text-[8px] font-black text-purple-200 truncate">
-                <LocateFixed className="w-2.5 h-2.5 text-purple-300 shrink-0" />
-                <span className="truncate">{waypointDist}m to Waypoint</span>
+              <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-md bg-purple-950/90 border border-purple-400/80 text-[11px] font-black text-purple-200 shadow-md">
+                <LocateFixed className="w-3 h-3 text-purple-300" />
+                <span>{waypointDist}m to Waypoint</span>
               </div>
             )}
             {missionDist !== null && (
-              <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-950/90 border border-amber-400/80 text-[8px] font-black text-amber-200 truncate">
-                <MapPin className="w-2.5 h-2.5 text-amber-300 shrink-0" />
-                <span className="truncate">{missionDist}m to Target</span>
+              <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-md bg-amber-950/90 border border-amber-400/80 text-[11px] font-black text-amber-200 shadow-md">
+                <MapPin className="w-3 h-3 text-amber-300" />
+                <span>{missionDist}m to Mission</span>
               </div>
             )}
           </div>
         </div>
-
-        {/* Left Side Pull-Tab Arrow Dock Handle */}
-        <button
-          onClick={() => setIsMobileOpen((prev) => !prev)}
-          className="h-16 px-1.5 rounded-r-xl bg-slate-950/95 border-r-2 border-y-2 border-cyan-400 text-cyan-300 flex flex-col items-center justify-center shadow-[0_4px_18px_rgba(0,240,255,0.6)] active:scale-95 transition-all cursor-pointer group"
-          title={isMobileOpen ? 'Swipe Left or Tap to Hide Map' : 'Swipe Right or Tap to Open Small Map'}
-        >
-          {isMobileOpen ? (
-            <ChevronLeft className="w-5 h-5 text-cyan-300 animate-pulse" />
-          ) : (
-            <div className="flex flex-col items-center gap-0.5">
-              <ChevronRight className="w-5 h-5 text-cyan-300 group-hover:translate-x-0.5 transition-transform animate-pulse" />
-              <span className="text-[8px] font-black uppercase text-cyan-400 tracking-tighter" style={{ writingMode: 'vertical-rl' }}>
-                MAP
-              </span>
-            </div>
-          )}
-        </button>
-      </div>
-
-      {/* ========================================================
-          DESKTOP / TABLET FULL GTA V BOTTOM-LEFT RADAR HUD
-      ======================================================== */}
-      <div className="hidden sm:flex fixed bottom-6 left-8 z-20 select-none flex-col items-start gap-1 font-sans pointer-events-auto">
-        {/* Full 250x165 Radar */}
-        {renderRadarContent(250, 165)}
-
-        {/* 3-Tier Status Bars */}
-        <div className="w-[250px] flex items-center gap-1.5 px-0.5">
-          <div className="flex-1 h-2 rounded-sm bg-black/80 border border-white/20 overflow-hidden shadow-inner">
-            <div
-              className="h-full bg-emerald-500 rounded-sm transition-all duration-150"
-              style={{ width: `${Math.max(5, Math.min(100, ((player.health || 1000) / (player.maxHealth || 1000)) * 100))}%` }}
-            />
-          </div>
-          <div className="flex-1 h-2 rounded-sm bg-black/80 border border-white/20 overflow-hidden shadow-inner">
-            <div
-              className="h-full bg-sky-500 rounded-sm transition-all duration-150"
-              style={{ width: `${Math.max(5, Math.min(100, ((player.armor || 1000) / (player.maxArmor || 1000)) * 100))}%` }}
-            />
-          </div>
-          <div className="flex-1 h-2 rounded-sm bg-black/80 border border-white/20 overflow-hidden shadow-inner">
-            <div
-              className="h-full bg-amber-400 rounded-sm transition-all duration-150"
-              style={{ width: `${Math.max(5, player.stamina || 100)}%` }}
-            />
-          </div>
-        </div>
-
-        {/* Waypoint & Mission Badges */}
-        <div className="flex flex-col gap-1 mt-1">
-          {waypointDist !== null && (
-            <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-md bg-purple-950/90 border border-purple-400/80 text-[11px] font-black text-purple-200 shadow-md">
-              <LocateFixed className="w-3 h-3 text-purple-300" />
-              <span>{waypointDist}m to Waypoint</span>
-            </div>
-          )}
-          {missionDist !== null && (
-            <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-md bg-amber-950/90 border border-amber-400/80 text-[11px] font-black text-amber-200 shadow-md">
-              <MapPin className="w-3 h-3 text-amber-300" />
-              <span>{missionDist}m to Mission</span>
-            </div>
-          )}
-        </div>
-      </div>
+      )}
     </>
   );
 };

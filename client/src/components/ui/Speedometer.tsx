@@ -1,9 +1,11 @@
 import React from 'react';
 import { useGameStore } from '../../stores/gameStore';
+import { useIsMobile } from '../../hooks/useIsMobile';
 import { Flame, Lightbulb, AlertTriangle } from 'lucide-react';
 
 export const Speedometer: React.FC = () => {
   const mode = useGameStore((s) => s.mode);
+  const isMobile = useIsMobile();
   const speed = useGameStore((s) => s.vehicleSpeed);
   const rpm = useGameStore((s) => s.vehicleRpm);
   const gear = useGameStore((s) => s.vehicleGear);
@@ -15,7 +17,8 @@ export const Speedometer: React.FC = () => {
   const isDrifting = useGameStore((s) => s.isDrifting);
   const speedUnit = useGameStore((s) => s.settings.speedUnit);
 
-  if (mode !== 'driving') return null;
+  // On mobile screens, the compact speed & fuel pill is already integrated beside the DRIFT button in MobileControls
+  if (mode !== 'driving' || isMobile) return null;
 
   const displaySpeed = speedUnit === 'mph' ? Math.round(speed * 0.621371) : speed;
   const isRedline = rpm > 7400;

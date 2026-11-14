@@ -64,14 +64,15 @@ export const resetVirtualInput = () => {
 
 /**
  * Mobile Device Detection
- * Detects touch capability, phone/tablet user-agents, and responsive mobile widths.
+ * Accurately detects touch phones, tablets, mobile browsers, and compact mobile landscape viewports.
  */
 export const isMobileDevice = (): boolean => {
   if (typeof window === 'undefined') return false;
   const ua = navigator.userAgent || '';
-  const isTouchUa = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
-  const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-  const isSmallScreen = window.innerWidth <= 1024;
-  return isTouchUa || (hasTouch && isSmallScreen);
+  const isTouchUa = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(ua);
+  const hasTouch = 'ontouchstart' in window || (navigator.maxTouchPoints && navigator.maxTouchPoints > 0);
+  const isShortHeight = window.innerHeight <= 550;
+  const isNarrowWidth = window.innerWidth <= 1024;
+  return isTouchUa || (hasTouch && (isNarrowWidth || isShortHeight)) || isShortHeight;
 };
 

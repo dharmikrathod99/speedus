@@ -191,13 +191,13 @@ export const CameraRig: React.FC = () => {
         const distBehind = 7.2 + (speedKmh / 300) * 2.0;
         const heightAbove = 2.5 + (speedKmh / 300) * 0.6;
 
-        // Auto-recenter behind car when driving if player hasn't touched camera for 1.8s
-        if (timeSinceManualLook > 1.8) {
+        // Gentle chase camera follow behind car when driving forward at speed
+        if (speedKmh > 12 && timeSinceManualLook > 4.0) {
           let targetAngle = heading + Math.PI;
           let diff = (targetAngle - orbitAngleX.current) % (Math.PI * 2);
           if (diff < -Math.PI) diff += Math.PI * 2;
           if (diff > Math.PI) diff -= Math.PI * 2;
-          orbitAngleX.current += diff * (1 - Math.exp(-3.5 * dt));
+          orbitAngleX.current += diff * (1 - Math.exp(-1.8 * dt));
         }
 
         const effectiveAngle = orbitAngleX.current;
@@ -260,17 +260,9 @@ export const CameraRig: React.FC = () => {
       const isInsideShop = useGameStore.getState().isInsideShop;
       const isInside = isInsideHouse || isInsideShop;
 
-      // Smart GTA-style Camera Follow Behind Player:
-      // When walking forward and player hasn't manually adjusted camera for 2.2s,
-      // gently align camera BEHIND player's back looking forward (rotationY + Math.PI)
-      const isWalkingForward = virtualInput.forward || virtualInput.analogY > 0.25;
-      if (playerPhysics.isMoving && isWalkingForward && timeSinceManualLook > 2.2 && !isInside) {
-        let targetAngle = playerPhysics.rotationY + Math.PI;
-        let diff = (targetAngle - orbitAngleX.current) % (Math.PI * 2);
-        if (diff < -Math.PI) diff += Math.PI * 2;
-        if (diff > Math.PI) diff -= Math.PI * 2;
-        orbitAngleX.current += diff * (1 - Math.exp(-2.0 * dt));
-      }
+      // In walking mode, camera position follows player smoothly without forcing camera angle.
+      // Player retains complete freedom over touch/mouse look without auto-lock snapping.
+      // Use recenter button [V] to snap behind player on demand.
 
       const dist = isInside ? 2.8 : 4.5;
       const camHeight = isInside ? 1.2 : 1.6;
