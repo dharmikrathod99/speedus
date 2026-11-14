@@ -18,7 +18,7 @@ export const App: React.FC = () => {
   }, [isPlaying, collectDailyRent]);
 
   return (
-    <div className="w-full h-full relative overflow-hidden select-none bg-black">
+    <div className="w-full h-full fixed inset-0 overflow-hidden select-none bg-black">
       {/* 3D Real-time Scene Viewport */}
       <GameScene />
 

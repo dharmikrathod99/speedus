@@ -216,15 +216,12 @@ export const PlayerCharacter: React.FC = () => {
       // Weapon selection: [1] Fists, [2] Bat, [3] Pistol (only when Ctrl/Meta not pressed)
       if (!e.ctrlKey && !e.metaKey && (k === '1' || e.code === 'Digit1')) {
         useGameStore.getState().setActiveWeapon('fists');
-        useGameStore.getState().showNotification('👊 WEAPON EQUIPPED', 'Fists / Unarmed Brawling', 'info');
       }
       if (!e.ctrlKey && !e.metaKey && (k === '2' || e.code === 'Digit2')) {
         useGameStore.getState().setActiveWeapon('bat');
-        useGameStore.getState().showNotification('🏏 WEAPON EQUIPPED', 'Hardwood Baseball Bat', 'info');
       }
       if (!e.ctrlKey && !e.metaKey && (k === '3' || e.code === 'Digit3')) {
         useGameStore.getState().setActiveWeapon('pistol');
-        useGameStore.getState().showNotification('🔫 WEAPON EQUIPPED', '9mm Semi-Automatic Pistol', 'warning');
       }
 
       // Keyboard attack on [F]

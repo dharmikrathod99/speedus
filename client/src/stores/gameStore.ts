@@ -641,7 +641,7 @@ export const useGameStore = create<GameState>()(
       }),
       setCustomWaypoint: (customWaypoint) => set({ customWaypoint }),
 
-      addCash: (amount, reason) => {
+      addCash: (amount) => {
         soundSystem.playCashRegister();
         set((state) => ({
           player: {
@@ -652,9 +652,7 @@ export const useGameStore = create<GameState>()(
             level: 1 + Math.floor((state.player.xp + amount * 0.1) / 1000)
           }
         }));
-        if (reason) {
-          get().showNotification('Reward Earned', `+$${amount.toLocaleString()} - ${reason}`, 'success');
-        }
+        // Suppressed routine reward popups: cash updates live on HUD without screen clutter
       },
 
       spendCash: (amount) => {
@@ -1471,13 +1469,34 @@ export const useGameStore = create<GameState>()(
       },
 
       showNotification: (title, message, type = 'info') => {
+        // Suppress useless routine notification popups (rewards, vehicle enter/exit, doors, TV, fridge, wardrobe, etc.)
+        const lowerTitle = title.toLowerCase();
+        const lowerMsg = message.toLowerCase();
+        if (
+          lowerTitle.includes('reward') ||
+          lowerTitle.includes('daily') ||
+          lowerTitle.includes('vehicle') ||
+          lowerTitle.includes('welcome') ||
+          lowerTitle.includes('exited') ||
+          lowerTitle.includes('weapon') ||
+          lowerTitle.includes('tv') ||
+          lowerTitle.includes('refrigerator') ||
+          lowerTitle.includes('wardrobe') ||
+          lowerTitle.includes('rest') ||
+          lowerMsg.includes('income') ||
+          lowerMsg.includes('behind the wheel') ||
+          lowerMsg.includes('stepped outside')
+        ) {
+          return;
+        }
+
         set({ notification: { title, message, type } });
         setTimeout(() => {
           const current = get().notification;
           if (current && current.title === title) {
             set({ notification: null });
           }
-        }, 4000);
+        }, 2800);
       },
 
       dismissNotification: () => set({ notification: null })

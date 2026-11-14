@@ -288,12 +288,7 @@ export const DrivableVehicle: React.FC = () => {
         if (vehiclePhysics.jumpAirtime > 0.4) {
           soundSystem.playCollisionSound(0.45);
           const bonusCash = Math.round(vehiclePhysics.jumpAirtime * 280 + Math.abs(vehiclePhysics.velocity) * 10);
-          useGameStore.getState().addCash(bonusCash, 'Stunt Jump Bonus');
-          useGameStore.getState().showNotification(
-            '🔥 STUNT JUMP LANDED!',
-            `Airtime: ${vehiclePhysics.jumpAirtime.toFixed(1)}s • Jump Reward: +$${bonusCash}`,
-            'success'
-          );
+          useGameStore.getState().addCash(bonusCash);
         }
 
         vehiclePhysics.velocityY = 0;

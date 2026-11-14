@@ -841,8 +841,7 @@ export const usePedestrianStore = create<PedestrianCombatState>((set, get) => ({
     if (!drop || drop.collected) return;
 
     soundSystem.playCashRegister();
-    useGameStore.getState().addCash(drop.amount, 'Looted Cash Drop');
-    useGameStore.getState().showNotification('💵 CASH COLLECTED', `Picked up +$${drop.amount} cash!`, 'success');
+    useGameStore.getState().addCash(drop.amount);
 
     set((s) => ({
       cashDrops: s.cashDrops.filter((d) => d.id !== dropId)
