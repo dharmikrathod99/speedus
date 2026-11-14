@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  speedus-game:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: speedus-app
+    restart: always
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - NODE_ENV=production
+      - JWT_SECRET=speedus_secure_docker_secret_2026
+      - CORS_ORIGIN=*
+    volumes:
+      - speedus-data:/app/server
+    networks:
+      - speedus-network
+
+networks:
+  speedus-network:
+    driver: bridge
+
+volumes:
+  speedus-data:
+

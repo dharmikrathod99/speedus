@@ -1,0 +1,31 @@
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+// https://vitejs.dev/config/
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    port: 5173,
+    host: true,
+    proxy: {
+      '/api': {
+        target: process.env.VITE_API_URL || 'http://localhost:3001',
+        changeOrigin: true
+      }
+    }
+  },
+  build: {
+    outDir: 'dist',
+    sourcemap: false,
+    chunkSizeWarningLimit: 2500,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          three: ['three'],
+          fiber: ['@react-three/fiber', '@react-three/drei'],
+          reactVendor: ['react', 'react-dom', 'zustand', 'lucide-react', 'framer-motion']
+        }
+      }
+    }
+  }
+});

@@ -1,0 +1,421 @@
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useGameStore } from '../../stores/gameStore';
+import { usePedestrianStore } from '../../stores/pedestrianCombat';
+import { virtualInput, setVirtualInput, isMobileDevice } from '../../stores/virtualInput';
+import { soundSystem } from '../../audio/soundSystem';
+import { vehiclePhysics, playerPhysics } from '../../stores/vehiclePhysics';
+import { getNearestEnterableVehicle } from '../../stores/entityVehicles';
+import { getNearestEnterableHouse } from '../../stores/houseSystem';
+import { CITY_SHOPS } from '../../data/shopsData';
+import {
+  Flame,
+  RotateCcw,
+  Volume2,
+  Crosshair,
+  ArrowUp,
+  ArrowDown,
+  ChevronUp,
+  LogOut,
+  Car,
+  ShoppingBag,
+  Home,
+  Hand
+} from 'lucide-react';
+
+export const MobileControls: React.FC = () => {
+  const mode = useGameStore((s) => s.mode);
+  const isInsideHouse = useGameStore((s) => s.isInsideHouse);
+  const isInsideShop = useGameStore((s) => s.isInsideShop);
+  const activeShopInteriorId = useGameStore((s) => s.activeShopInteriorId);
+  const enterShopInterior = useGameStore((s) => s.enterShopInterior);
+  const exitShopInterior = useGameStore((s) => s.exitShopInterior);
+  const openShop = useGameStore((s) => s.openShop);
+  const toggleVehicleEntry = useGameStore((s) => s.toggleVehicleEntry);
+  const activeScreen = useGameStore((s) => s.activeScreen);
+  const isWasted = useGameStore((s) => s.isWasted);
+  const activeWeapon = useGameStore((s) => s.activeWeapon);
+  const setActiveWeapon = useGameStore((s) => s.setActiveWeapon);
+  const playerPos = useGameStore((s) => s.playerPosition);
+
+  // Force show on touch/mobile or responsive small screens
+  const [enabled, setEnabled] = useState<boolean>(() => isMobileDevice());
+  const [joystickActive, setJoystickActive] = useState<boolean>(false);
+  const [joystickOffset, setJoystickOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+
+  const joystickCenterRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const touchIdRef = useRef<number | null>(null);
+
+  // Auto-detect mobile devices on resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (isMobileDevice()) {
+        setEnabled(true);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Virtual Analog Joystick touch handlers
+  const handleJoystickStart = (e: React.PointerEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const rect = e.currentTarget.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    joystickCenterRef.current = { x: centerX, y: centerY };
+    touchIdRef.current = e.pointerId;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    setJoystickActive(true);
+
+    handleJoystickMove(e);
+  };
+
+  const handleJoystickMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!joystickActive && touchIdRef.current !== e.pointerId) return;
+    const dx = e.clientX - joystickCenterRef.current.x;
+    const dy = e.clientY - joystickCenterRef.current.y;
+    const maxRadius = 46;
+    const distance = Math.hypot(dx, dy);
+    const clampedDist = Math.min(distance, maxRadius);
+    const angle = Math.atan2(dy, dx);
+
+    const stickX = Math.cos(angle) * clampedDist;
+    const stickY = Math.sin(angle) * clampedDist;
+
+    setJoystickOffset({ x: stickX, y: stickY });
+
+    const normX = stickX / maxRadius;
+    const normY = -stickY / maxRadius; // Up is positive
+
+    virtualInput.analogX = normX;
+    virtualInput.analogY = normY;
+    virtualInput.forward = normY > 0.22;
+    virtualInput.backward = normY < -0.22;
+    virtualInput.left = normX < -0.22;
+    virtualInput.right = normX > 0.22;
+
+    // Sprint when joystick is pushed over 85% to the edge
+    virtualInput.sprint = Math.hypot(normX, normY) > 0.85;
+  };
+
+  const handleJoystickEnd = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (touchIdRef.current === e.pointerId) {
+      touchIdRef.current = null;
+      setJoystickActive(false);
+      setJoystickOffset({ x: 0, y: 0 });
+      virtualInput.analogX = 0;
+      virtualInput.analogY = 0;
+      virtualInput.forward = false;
+      virtualInput.backward = false;
+      virtualInput.left = false;
+      virtualInput.right = false;
+      virtualInput.sprint = false;
+    }
+  };
+
+  // Walking Punch / Attack Action
+  const handleAttack = useCallback(() => {
+    if (isWasted) return;
+    virtualInput.attack = true;
+    usePedestrianStore.getState().playerAttack(activeWeapon);
+    setTimeout(() => {
+      virtualInput.attack = false;
+    }, 120);
+  }, [isWasted, activeWeapon]);
+
+  // Walking Jump Action
+  const handleJump = useCallback(() => {
+    virtualInput.jump = true;
+    setTimeout(() => {
+      virtualInput.jump = false;
+    }, 150);
+  }, []);
+
+  // Contextual Action helper (Enter Shop, Exit Shop, Enter House, etc.)
+  const handleContextAction = useCallback(() => {
+    const [px, , pz] = playerPos;
+    if (isInsideShop) {
+      if (pz < -5.5) {
+        exitShopInterior();
+      } else if (activeShopInteriorId) {
+        openShop(activeShopInteriorId);
+      }
+      return;
+    }
+
+    if (isInsideHouse) {
+      if (pz < -5.0 && Math.abs(px) < 2.5) {
+        useGameStore.getState().exitHouse();
+      } else if (px > 8.0 && pz < -1.5 && pz > -5.0) {
+        useGameStore.getState().eatFromFridge();
+      } else if (px > 9.5 && pz > 3.0) {
+        useGameStore.getState().setActiveScreen('wardrobe');
+      } else if (px > 4.5 && px <= 9.5 && pz > 3.5) {
+        useGameStore.getState().restInBed();
+      } else if (px < 1.0 && pz > 0.0 && pz < 7.0) {
+        useGameStore.getState().cycleTvChannel();
+      }
+      return;
+    }
+
+    if (mode === 'walking') {
+      let nearestShop = null;
+      let minShopDist = 18.0;
+      for (const shop of CITY_SHOPS) {
+        const doorZ = shop.position[2] + (shop.localPos[2] > 0 ? -7.8 : 7.8);
+        const distDoor = Math.hypot(px - shop.position[0], pz - doorZ);
+        const distCenter = Math.hypot(px - shop.position[0], pz - shop.position[2]);
+        const d = Math.min(distDoor, distCenter);
+        if (d < minShopDist) {
+          minShopDist = d;
+          nearestShop = shop;
+        }
+      }
+
+      if (nearestShop) {
+        enterShopInterior(nearestShop.id);
+        return;
+      }
+
+      const nearestHouse = getNearestEnterableHouse(px, pz, 8.5);
+      if (nearestHouse) {
+        useGameStore.getState().enterHouse(nearestHouse.id);
+        return;
+      }
+    }
+  }, [playerPos, isInsideShop, isInsideHouse, activeShopInteriorId, mode, enterShopInterior, exitShopInterior, openShop]);
+
+  if (!enabled) {
+    return (
+      <button
+        onClick={() => setEnabled(true)}
+        className="fixed top-18 right-3 z-40 px-3 py-1.5 rounded-full bg-slate-900/80 backdrop-blur-md border border-cyan-400/50 text-[11px] font-black text-cyan-300 shadow-lg select-none cursor-pointer"
+        title="Enable On-Screen Touch Controls"
+      >
+        📱 Touch Controls
+      </button>
+    );
+  }
+
+  // Check proximity for action button icon & badge
+  const [px, , pz] = playerPos;
+  const nearVehicle = mode === 'walking' && !!getNearestEnterableVehicle(px, pz, 7.0);
+  const nearShop = mode === 'walking' && CITY_SHOPS.some((s) => Math.hypot(px - s.position[0], pz - s.position[2]) < 18.0);
+  const nearHouse = mode === 'walking' && !!getNearestEnterableHouse(px, pz, 9.0);
+
+  return (
+    <div className="fixed inset-0 pointer-events-none z-30 select-none overflow-hidden touch-none">
+      {/* ========================================================
+          VIRTUAL ANALOG JOYSTICK (Bottom-Left)
+      ======================================================== */}
+      <div className="joystick-container absolute bottom-6 left-6 pointer-events-auto touch-none">
+        <div
+          onPointerDown={handleJoystickStart}
+          onPointerMove={handleJoystickMove}
+          onPointerUp={handleJoystickEnd}
+          onPointerCancel={handleJoystickEnd}
+          className="relative w-32 h-32 rounded-full bg-slate-950/75 backdrop-blur-md border-2 border-cyan-400/40 shadow-[0_0_25px_rgba(0,240,255,0.3)] flex items-center justify-center cursor-grab active:cursor-grabbing"
+          style={{ touchAction: 'none' }}
+        >
+          {/* Subtle directional indicators */}
+          <div className="absolute top-2 w-1.5 h-1.5 rounded-full bg-cyan-400/60" />
+          <div className="absolute bottom-2 w-1.5 h-1.5 rounded-full bg-cyan-400/60" />
+          <div className="absolute left-2 w-1.5 h-1.5 rounded-full bg-cyan-400/60" />
+          <div className="absolute right-2 w-1.5 h-1.5 rounded-full bg-cyan-400/60" />
+
+          {/* Draggable Analog Thumb Stick */}
+          <div
+            className="w-14 h-14 rounded-full bg-gradient-to-tr from-cyan-500 to-sky-400 border-2 border-white/90 shadow-[0_0_15px_rgba(0,240,255,0.8)] flex items-center justify-center transition-transform duration-75"
+            style={{
+              transform: `translate(${joystickOffset.x}px, ${joystickOffset.y}px)`
+            }}
+          >
+            <div className="w-5 h-5 rounded-full bg-white/40 shadow-inner" />
+          </div>
+        </div>
+        <div className="text-center text-[10px] font-black text-cyan-300/80 mt-1 uppercase tracking-wider">
+          {mode === 'driving' ? 'Steer / Drive' : 'Move'}
+        </div>
+      </div>
+
+      {/* ========================================================
+          RIGHT ACTION BUTTONS (DRIVING MODE)
+      ======================================================== */}
+      {mode === 'driving' ? (
+        <div className="absolute bottom-6 right-6 flex flex-col items-end gap-3 pointer-events-auto touch-none interactive-ui">
+          {/* Top Row: Horn, Nitro, Exit */}
+          <div className="flex items-center gap-2">
+            {/* Nitro Boost Button */}
+            <button
+              onPointerDown={() => { virtualInput.boost = true; }}
+              onPointerUp={() => { virtualInput.boost = false; }}
+              onPointerCancel={() => { virtualInput.boost = false; }}
+              className="w-13 h-13 rounded-2xl bg-gradient-to-tr from-pink-600 to-purple-500 border-2 border-pink-300 text-white font-black flex flex-col items-center justify-center shadow-[0_0_20px_rgba(255,0,127,0.6)] active:scale-95 transition-transform"
+            >
+              <Flame className="w-5 h-5" />
+              <span className="text-[9px] font-bold">NITRO</span>
+            </button>
+
+            {/* Horn Button */}
+            <button
+              onPointerDown={() => {
+                soundSystem.startHorn();
+                virtualInput.horn = true;
+              }}
+              onPointerUp={() => {
+                soundSystem.stopHorn();
+                virtualInput.horn = false;
+              }}
+              onPointerCancel={() => {
+                soundSystem.stopHorn();
+                virtualInput.horn = false;
+              }}
+              className="w-12 h-12 rounded-2xl bg-slate-900/85 backdrop-blur-md border-2 border-amber-400/70 text-amber-300 flex flex-col items-center justify-center shadow-lg active:scale-95 transition-transform"
+            >
+              <Volume2 className="w-5 h-5" />
+              <span className="text-[8px] font-bold">HORN</span>
+            </button>
+
+            {/* Exit Vehicle Button */}
+            <button
+              onClick={() => toggleVehicleEntry()}
+              className="w-12 h-12 rounded-2xl bg-slate-900/85 backdrop-blur-md border-2 border-rose-500/70 text-rose-300 flex flex-col items-center justify-center shadow-lg active:scale-95 transition-transform"
+            >
+              <LogOut className="w-5 h-5" />
+              <span className="text-[8px] font-bold">EXIT</span>
+            </button>
+          </div>
+
+          {/* Bottom Row: Large Gas & Brake Pedals + Drift */}
+          <div className="flex items-end gap-2.5">
+            {/* Handbrake Drift Button */}
+            <button
+              onPointerDown={() => { virtualInput.handbrake = true; }}
+              onPointerUp={() => { virtualInput.handbrake = false; }}
+              onPointerCancel={() => { virtualInput.handbrake = false; }}
+              className="w-14 h-16 rounded-2xl bg-slate-900/90 backdrop-blur-md border-2 border-yellow-400 text-yellow-300 font-black flex flex-col items-center justify-center shadow-[0_0_15px_rgba(250,204,21,0.4)] active:scale-95 transition-transform"
+            >
+              <RotateCcw className="w-5 h-5" />
+              <span className="text-[9px] font-black">DRIFT</span>
+            </button>
+
+            {/* Brake / Reverse Pedal */}
+            <button
+              onPointerDown={() => { virtualInput.backward = true; }}
+              onPointerUp={() => { virtualInput.backward = false; }}
+              onPointerCancel={() => { virtualInput.backward = false; }}
+              className="w-16 h-22 rounded-2xl bg-gradient-to-b from-red-600 to-rose-700 border-2 border-white/80 text-white font-black flex flex-col items-center justify-center shadow-[0_0_20px_rgba(225,29,72,0.6)] active:scale-95 transition-transform"
+            >
+              <ArrowDown className="w-7 h-7" />
+              <span className="text-[10px] font-black">BRAKE</span>
+            </button>
+
+            {/* Accelerate / Gas Pedal */}
+            <button
+              onPointerDown={() => { virtualInput.forward = true; }}
+              onPointerUp={() => { virtualInput.forward = false; }}
+              onPointerCancel={() => { virtualInput.forward = false; }}
+              className="w-18 h-26 rounded-2xl bg-gradient-to-b from-emerald-500 to-teal-600 border-2 border-white/90 text-white font-black flex flex-col items-center justify-center shadow-[0_0_25px_rgba(16,185,129,0.7)] active:scale-95 transition-transform"
+            >
+              <ArrowUp className="w-8 h-8" />
+              <span className="text-[11px] font-black">GAS</span>
+            </button>
+          </div>
+        </div>
+      ) : (
+        /* ========================================================
+            RIGHT ACTION BUTTONS (WALKING MODE)
+        ======================================================== */
+        <div className="absolute bottom-6 right-6 flex flex-col items-end gap-3 pointer-events-auto touch-none interactive-ui">
+          {/* Quick Weapon Switch Pills */}
+          <div className="flex items-center gap-1.5 bg-slate-950/85 backdrop-blur-md p-1 rounded-2xl border border-white/20">
+            {(['fists', 'bat', 'pistol'] as const).map((w) => (
+              <button
+                key={w}
+                onClick={() => setActiveWeapon(w)}
+                className={`px-2.5 py-1 rounded-xl text-[10px] font-black uppercase transition-all ${
+                  activeWeapon === w
+                    ? 'bg-amber-400 text-black shadow-md scale-105'
+                    : 'text-gray-300 hover:text-white'
+                }`}
+              >
+                {w === 'fists' ? '👊 Fists' : w === 'bat' ? '🏏 Bat' : '🔫 Pistol'}
+              </button>
+            ))}
+          </div>
+
+          {/* Context Interaction Button (Enter Shop / House / Door / Fridge / Bed) */}
+          {(nearShop || nearHouse || isInsideShop || isInsideHouse) && (
+            <button
+              onClick={handleContextAction}
+              className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 border-2 border-white/80 text-white font-display font-black text-xs uppercase tracking-wider flex items-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.7)] active:scale-95 transition-transform animate-bounce"
+            >
+              {isInsideShop ? (
+                <>
+                  <ShoppingBag className="w-4 h-4" />
+                  <span>{pz < -5.5 ? 'Exit to Street' : 'Buy Items'}</span>
+                </>
+              ) : isInsideHouse ? (
+                <>
+                  <Home className="w-4 h-4" />
+                  <span>Interact / Exit</span>
+                </>
+              ) : nearShop ? (
+                <>
+                  <ShoppingBag className="w-4 h-4" />
+                  <span>Enter Store</span>
+                </>
+              ) : (
+                <>
+                  <Home className="w-4 h-4" />
+                  <span>Enter House</span>
+                </>
+              )}
+            </button>
+          )}
+
+          {/* Primary Action Buttons Grid */}
+          <div className="flex items-end gap-3">
+            {/* Enter / Exit Car Button (Highlighted when near car) */}
+            <button
+              onClick={() => toggleVehicleEntry()}
+              className={`w-14 h-14 rounded-2xl flex flex-col items-center justify-center font-black active:scale-95 transition-all ${
+                nearVehicle
+                  ? 'bg-gradient-to-tr from-pink-500 to-rose-500 text-white border-2 border-white shadow-[0_0_20px_rgba(255,0,127,0.8)] animate-pulse'
+                  : 'bg-slate-900/85 backdrop-blur-md text-gray-300 border border-white/20'
+              }`}
+            >
+              <Car className="w-6 h-6" />
+              <span className="text-[9px] font-bold">CAR</span>
+            </button>
+
+            {/* Jump Button */}
+            <button
+              onClick={handleJump}
+              className="w-15 h-15 rounded-2xl bg-cyan-600/90 border-2 border-cyan-300 text-white flex flex-col items-center justify-center shadow-[0_0_15px_rgba(0,240,255,0.5)] active:scale-95 transition-transform"
+            >
+              <ChevronUp className="w-7 h-7" />
+              <span className="text-[9px] font-black">JUMP</span>
+            </button>
+
+            {/* Punch / Attack Button */}
+            <button
+              onClick={handleAttack}
+              className="w-18 h-18 rounded-3xl bg-gradient-to-tr from-red-600 via-rose-500 to-amber-500 border-2 border-white text-white font-black flex flex-col items-center justify-center shadow-[0_0_30px_rgba(239,68,68,0.8)] active:scale-90 transition-transform"
+            >
+              {activeWeapon === 'pistol' ? (
+                <Crosshair className="w-8 h-8" />
+              ) : (
+                <Hand className="w-8 h-8" />
+              )}
+              <span className="text-[10px] font-black tracking-wider">
+                {activeWeapon === 'pistol' ? 'SHOOT' : 'ATTACK'}
+              </span>
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};

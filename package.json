@@ -1,0 +1,24 @@
+{
+  "name": "speedus-fullstack",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "dev": "concurrently -n \"CLIENT,SERVER\" -c \"cyan,magenta\" \"npm run dev --prefix client\" \"node server/index.js\"",
+    "build": "npm run build --prefix client",
+    "start": "node server/index.js",
+    "client:dev": "npm run dev --prefix client",
+    "client:build": "npm run build --prefix client",
+    "client:preview": "npm run preview --prefix client",
+    "server:dev": "node --watch server/index.js",
+    "server:start": "node server/index.js",
+    "install:all": "npm install && npm install --prefix client && npm install --prefix server"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
