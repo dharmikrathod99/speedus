@@ -206,14 +206,14 @@ export const FullCityMapModal: React.FC = () => {
         </div>
 
         {/* Sub-Header: District & Legend Pills */}
-        <div className="h-12 px-6 flex items-center justify-between border-b border-white/10 bg-slate-900/90 shrink-0">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-black text-cyan-400 uppercase tracking-widest mr-2">
-              POI FILTER:
+        <div className="h-11 sm:h-12 px-3 sm:px-6 flex items-center justify-between border-b border-white/10 bg-slate-900/90 shrink-0 overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            <span className="text-[10px] sm:text-xs font-black text-cyan-400 uppercase tracking-widest mr-1 sm:mr-2 shrink-0">
+              FILTER:
             </span>
             {[
               { id: 'all', label: 'All Markers' },
-              { id: 'shops', label: 'Shops & Stores' },
+              { id: 'shops', label: 'Shops' },
               { id: 'safehouse', label: 'Safehouses' },
               { id: 'services', label: 'Services' },
               { id: 'stunts', label: 'Stunts' },
@@ -222,7 +222,7 @@ export const FullCityMapModal: React.FC = () => {
               <button
                 key={f.id}
                 onClick={() => setFilter(f.id as any)}
-                className={`px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+                className={`shrink-0 px-2.5 py-1 sm:px-3 sm:py-1 rounded-lg text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
                   filter === f.id
                     ? 'bg-white text-black font-black shadow-md'
                     : 'bg-slate-800 text-gray-400 hover:text-white hover:bg-slate-700'

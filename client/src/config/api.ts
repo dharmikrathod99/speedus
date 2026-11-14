@@ -27,3 +27,4 @@ export async function fetchApi<T = any>(endpoint: string, options: RequestInit =
 
   return response.json();
 }
+

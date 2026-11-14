@@ -12,6 +12,8 @@ export const MiniMap: React.FC = () => {
   const customWaypoint = useGameStore((s) => s.customWaypoint);
   const setActiveScreen = useGameStore((s) => s.setActiveScreen);
 
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
   // Live 60 FPS physics position & heading state
   const [pos, setPos] = useState<{ x: number; z: number; heading: number }>({ x: 0, z: 0, heading: 0 });
 
@@ -171,8 +173,21 @@ export const MiniMap: React.FC = () => {
     [scale]
   );
 
+  if (isCollapsed) {
+    return (
+      <div className="fixed top-12 left-2 z-20 pointer-events-auto">
+        <button
+          onClick={() => setIsCollapsed(false)}
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-black/85 backdrop-blur-md border border-cyan-400/60 text-cyan-300 text-[10px] font-black uppercase shadow-lg active:scale-95 transition-all cursor-pointer"
+        >
+          <span>🧭 MAP</span>
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div className="fixed top-14 left-3 sm:top-auto sm:bottom-6 sm:left-8 z-20 select-none flex flex-col items-start gap-1 font-sans scale-80 sm:scale-100 origin-top-left sm:origin-bottom-left pointer-events-auto">
+    <div className="fixed top-12 left-2 sm:top-auto sm:bottom-6 sm:left-8 z-20 select-none flex flex-col items-start gap-1 font-sans scale-[0.62] sm:scale-100 origin-top-left sm:origin-bottom-left pointer-events-auto">
       {/* ========================================================
           AUTHENTIC GTA V RECTANGULAR RADAR FRAME
       ======================================================== */}
@@ -184,6 +199,17 @@ export const MiniMap: React.FC = () => {
           boxShadow: '0 8px 30px rgba(0,0,0,0.85), inset 0 0 0 1px rgba(255,255,255,0.15)'
         }}
       >
+        {/* Mobile Minimize Toggle Button */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsCollapsed(true);
+          }}
+          className="block sm:hidden absolute top-1.5 right-1.5 z-40 px-1.5 py-0.5 rounded-md bg-black/80 border border-white/20 text-gray-300 hover:text-white"
+          title="Minimize Radar"
+        >
+          <span className="text-[9px] font-bold">✕</span>
+        </button>
         {/* Subtle Scanline / Radar Grid Overlay */}
         <div className="absolute inset-0 pointer-events-none z-10 opacity-30">
           <div className="w-full h-full border border-white/10" />
